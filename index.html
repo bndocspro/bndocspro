@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texas Educator Certificate Generator</title>
+    <!-- Libraries for Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --sbec-blue: #3b6695;
+            --sbec-red: #991b1b;
+            --sbec-light-blue: #e3f2fd;
+            --text-gray: #333;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Control Panel */
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            transition: 0.2s;
+        }
+
+        .btn-gen { background: #4caf50; color: white; }
+        .btn-png { background: #2196f3; color: white; }
+        .btn-pdf { background: #f44336; color: white; }
+        button:hover { opacity: 0.8; }
+
+        /* Certificate Styling - Matches Image Exactly */
+        #capture-area {
+            width: 900px;
+            background-color: white;
+            padding-bottom: 20px;
+        }
+
+        .top-header {
+            width: 100%;
+            background-color: var(--sbec-blue);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            font-size: 26px;
+        }
+
+        .header-left { display: flex; align-items: center; }
+        .check-icon {
+            border: 2px solid white;
+            border-radius: 8px;
+            padding: 2px 6px;
+            margin-right: 15px;
+            font-size: 22px;
+        }
+
+        .nav-link {
+            text-align: center;
+            margin: 15px 0;
+            color: #1a4d80;
+            text-decoration: underline;
+            font-size: 18px;
+        }
+
+        .certificate-border {
+            width: 95%;
+            margin: 0 auto;
+            background-color: white;
+            border: 4px solid var(--sbec-blue);
+            padding: 30px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        h1.cert-title {
+            color: var(--sbec-red);
+            font-family: "Times New Roman", Times, serif;
+            font-size: 44px;
+            font-style: italic;
+            font-weight: bold;
+            margin: 0;
+        }
+
+        .cert-subtitle {
+            font-family: "Times New Roman", Times, serif;
+            font-style: italic;
+            font-size: 18px;
+            margin: 5px 0;
+        }
+
+        .cert-name {
+            color: #4a76a8;
+            font-family: "Times New Roman", Times, serif;
+            font-style: italic;
+            font-size: 48px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .cert-statement {
+            font-family: "Times New Roman", Times, serif;
+            font-style: italic;
+            font-size: 18px;
+            line-height: 1.3;
+            max-width: 600px;
+            margin: 0 auto 20px auto;
+        }
+
+        .standard-banner {
+            background-color: var(--sbec-light-blue);
+            color: var(--sbec-blue);
+            font-weight: bold;
+            padding: 8px;
+            margin-top: 20px;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        th { font-size: 16px; font-weight: bold; padding: 10px 5px; }
+        td { padding: 8px 5px; vertical-align: top; font-size: 15px; }
+        .row-bold { font-weight: bold; }
+        .indent { padding-left: 20px; }
+        .status-valid { color: #2e7d32; text-decoration: underline; }
+
+        .footer-info {
+            margin-top: 40px;
+            font-size: 13px;
+            font-weight: bold;
+            color: black;
+            text-align: center;
+        }
+
+        /* Hide buttons during capture if needed, though we target specific div */
+    </style>
+</head>
+<body>
+
+    <div class="controls">
+        <button class="btn-gen" onclick="generateNewRecord()">Generate Random Name</button>
+        <button class="btn-png" onclick="downloadPNG()">Download PNG</button>
+        <button class="btn-pdf" onclick="downloadPDF()">Download PDF</button>
+    </div>
+
+    <!-- MAIN DESIGN AREA -->
+    <div id="capture-area">
+        <div class="top-header">
+            <div class="header-left">
+                <span class="check-icon">✓</span>
+                <span>SBEC Official Record of Educator Certifica...</span>
+            </div>
+            <div class="refresh-icon">↻</div>
+        </div>
+
+        <div class="nav-link">View Certificate History</div>
+
+        <div class="certificate-border">
+            <h1 class="cert-title">Texas Educator Certificate</h1>
+            <p class="cert-subtitle">This certifies that</p>
+            <p class="cert-name" id="teacher-name">Chris A Allen</p>
+            <p class="cert-statement">
+                has fulfilled requirements of state law and regulations of the<br>
+                State Board for Educator Certification<br>
+                and is hereby authorized to perform duties as designated below:
+            </p>
+
+            <div class="standard-banner">STANDARD</div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 45%;">Description</th>
+                        <th style="width: 20%; text-align: center;">Effective Date</th>
+                        <th style="width: 20%; text-align: center;">Expiration Date</th>
+                        <th style="width: 15%; text-align: center;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="row-bold"><td>Classroom Teacher</td><td></td><td></td><td></td></tr>
+                    <tr>
+                        <td class="indent">Special Education<br>Grades (EC-12)</td>
+                        <td style="text-align: center;">08/01/2024</td>
+                        <td style="text-align: center;">07/31/2030</td>
+                        <td style="text-align: center;"><span class="status-valid">Valid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="indent">Generalist<br>Grades (4-8)</td>
+                        <td style="text-align: center;">08/01/2024</td>
+                        <td style="text-align: center;">07/31/2030</td>
+                        <td style="text-align: center;"><span class="status-valid">Valid</span></td>
+                    </tr>
+                    <tr>
+                        <td class="indent">English as a Second Language Supplemental<br>Grades (EC-12)</td>
+                        <td style="text-align: center;">08/01/2024</td>
+                        <td style="text-align: center;">07/31/2030</td>
+                        <td style="text-align: center;"><span class="status-valid">Valid</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="footer-info">
+                Official Record of Certification<br>
+                <span id="current-date">Friday, January 02, 2026</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Lists for Random Name Generation
+        const firstNames = ["James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen"];
+        const middleInitials = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "R", "S", "T", "W"];
+        const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzales", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
+
+        function generateNewRecord() {
+            // Generate Name
+            const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
+            const mi = middleInitials[Math.floor(Math.random() * middleInitials.length)];
+            const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
+            document.getElementById('teacher-name').innerText = `${fn} ${mi} ${ln}`;
+
+            // Update Date to Current
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' };
+            const formattedDate = now.toLocaleDateString('en-US', options);
+            document.getElementById('current-date').innerText = formattedDate;
+        }
+
+        // Initialize with current date on load
+        window.onload = generateNewRecord;
+
+        // Export as PNG
+        async function downloadPNG() {
+            const element = document.getElementById('capture-area');
+            const canvas = await html2canvas(element, { scale: 2 }); // Scale 2 for high quality
+            const link = document.createElement('a');
+            link.download = `Certificate_${document.getElementById('teacher-name').innerText}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+        }
+
+        // Export as PDF
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const element = document.getElementById('capture-area');
+            
+            const canvas = await html2canvas(element, { scale: 2 });
+            const imgData = canvas.toDataURL('image/png');
+            
+            // Calculate dimensions to fit A4
+            const pdf = new jsPDF('l', 'px', [canvas.width, canvas.height]);
+            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+            pdf.save(`Certificate_${document.getElementById('teacher-name').innerText}.pdf`);
+        }
+    </script>
+</body>
+</html>
