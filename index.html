@@ -1,64 +1,125 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Texas Educator Certificate Generator</title>
-    <!-- Libraries for Export -->
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- MUI -->
+    <script crossorigin src="https://unpkg.com/@mui/material@5.15.0/umd/material-ui.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@emotion/react@11/dist/emotion-react.umd.min.js"></script>
+    <script crossorigin src="https://unpkg.com/@emotion/styled@11/dist/emotion-styled.umd.min.js"></script>
+
+    <!-- Modern Typography - Inter Font Family -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Export Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
+
     <style>
+        /* ========================================
+           MODERN DESIGN SYSTEM
+           ======================================== */
+
         :root {
+            /* Certificate Colors (preserved for document) */
             --sbec-blue: #3b6695;
             --sbec-red: #991b1b;
             --sbec-light-blue: #e3f2fd;
-            --text-gray: #333;
+
+            /* Modern UI Color Palette */
+            --primary-600: #2563eb;
+            --primary-700: #1d4ed8;
+            --secondary-500: #ef4444;
+            --secondary-600: #dc2626;
+            --success-500: #22c55e;
+            --success-600: #16a34a;
+
+            /* Neutral Palette */
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #111827;
+
+            /* Backgrounds */
+            --bg-gradient-soft: linear-gradient(135deg,
+                    #f5f7fa 0%,
+                    #c3cfe2 100%);
+
+            /* Shadows */
+            --shadow-sm:
+                0 1px 3px 0 rgba(0, 0, 0, 0.1),
+                0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md:
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg:
+                0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl:
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+            /* Border Radius */
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+
+            /* Typography */
+            --font-sans:
+                "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+                sans-serif;
+
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background-color: #e0e0e0;
             margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 0;
+            font-family: var(--font-sans);
+            background: var(--bg-gradient-soft);
+            color: var(--gray-900);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Control Panel */
-        .controls {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            transition: 0.2s;
-        }
-
-        .btn-gen { background: #4caf50; color: white; }
-        .btn-png { background: #2196f3; color: white; }
-        .btn-pdf { background: #f44336; color: white; }
-        button:hover { opacity: 0.8; }
-
-        /* Certificate Styling - Matches Image Exactly */
-        #capture-area {
+        /*
+           This container is the "source of truth" for the image/pdf generation.
+           It stays at 900px width to match the original requirement/aspect ratio.
+        */
+        .cert-fixed-width {
             width: 900px;
             background-color: white;
-            padding-bottom: 20px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: var(--shadow-2xl);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
         }
 
         .top-header {
@@ -73,7 +134,11 @@
             font-size: 26px;
         }
 
-        .header-left { display: flex; align-items: center; }
+        .header-left {
+            display: flex;
+            align-items: center;
+        }
+
         .check-icon {
             border: 2px solid white;
             border-radius: 8px;
@@ -88,6 +153,7 @@
             color: #1a4d80;
             text-decoration: underline;
             font-size: 18px;
+            font-family: Arial, sans-serif;
         }
 
         .certificate-border {
@@ -143,20 +209,41 @@
             font-size: 16px;
             letter-spacing: 1px;
             text-align: center;
+            font-family: Arial, sans-serif;
         }
 
-        table {
+        table.cert-table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
             margin-top: 10px;
+            font-family: Arial, sans-serif;
         }
 
-        th { font-size: 16px; font-weight: bold; padding: 10px 5px; }
-        td { padding: 8px 5px; vertical-align: top; font-size: 15px; }
-        .row-bold { font-weight: bold; }
-        .indent { padding-left: 20px; }
-        .status-valid { color: #2e7d32; text-decoration: underline; }
+        table.cert-table th {
+            font-size: 16px;
+            font-weight: bold;
+            padding: 10px 5px;
+        }
+
+        table.cert-table td {
+            padding: 8px 5px;
+            vertical-align: top;
+            font-size: 15px;
+        }
+
+        .row-bold {
+            font-weight: bold;
+        }
+
+        .indent {
+            padding-left: 20px;
+        }
+
+        .status-valid {
+            color: #2e7d32;
+            text-decoration: underline;
+        }
 
         .footer-info {
             margin-top: 40px;
@@ -164,128 +251,2158 @@
             font-weight: bold;
             color: black;
             text-align: center;
+            font-family: Arial, sans-serif;
         }
 
-        /* Hide buttons during capture if needed, though we target specific div */
+        /* Mobile Scaling helper */
+        .preview-wrapper {
+            transform-origin: top center;
+            margin-bottom: 20px;
+            transition: transform var(--transition-base);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--gray-100);
+            border-radius: 9999px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-400);
+            border-radius: 9999px;
+            transition: background var(--transition-fast);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-500);
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
+
 <body>
+    <div id="root"></div>
 
-    <div class="controls">
-        <button class="btn-gen" onclick="generateNewRecord()">Generate Random Name</button>
-        <button class="btn-png" onclick="downloadPNG()">Download PNG</button>
-        <button class="btn-pdf" onclick="downloadPDF()">Download PDF</button>
-    </div>
+    <script type="text/babel">
+        const {
+            createTheme,
+            ThemeProvider,
+            CssBaseline,
+            Container,
+            Grid,
+            Paper,
+            Typography,
+            TextField,
+            Button,
+            Box,
+            IconButton,
+            Divider,
+            Stack,
+            FormControl,
+            InputLabel,
+            Select,
+            MenuItem,
+            Card,
+            CardContent,
+            useMediaQuery,
+        } = MaterialUI;
 
-    <!-- MAIN DESIGN AREA -->
-    <div id="capture-area">
-        <div class="top-header">
-            <div class="header-left">
-                <span class="check-icon">✓</span>
-                <span>SBEC Official Record of Educator Certifica...</span>
-            </div>
-            <div class="refresh-icon">↻</div>
-        </div>
+        const theme = createTheme({
+            palette: {
+                primary: {
+                    main: "#2563eb",
+                    dark: "#1d4ed8",
+                    light: "#60a5fa",
+                    contrastText: "#ffffff",
+                },
+                secondary: {
+                    main: "#ef4444",
+                    dark: "#dc2626",
+                    light: "#f87171",
+                    contrastText: "#ffffff",
+                },
+                success: {
+                    main: "#22c55e",
+                    dark: "#16a34a",
+                    light: "#4ade80",
+                },
+                background: {
+                    default: "#f8fafc",
+                    paper: "#ffffff",
+                },
+                text: {
+                    primary: "#111827",
+                    secondary: "#6b7280",
+                },
+            },
+            typography: {
+                fontFamily:
+                    "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+                h5: {
+                    fontWeight: 700,
+                    letterSpacing: "-0.02em",
+                },
+                subtitle2: {
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                },
+                button: {
+                    fontWeight: 600,
+                    textTransform: "none",
+                    letterSpacing: "0.01em",
+                },
+            },
+            shape: {
+                borderRadius: 12,
+            },
+            shadows: [
+                "none",
+                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+                "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+                "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+                "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+            ],
+            components: {
+                MuiButton: {
+                    styleOverrides: {
+                        root: {
+                            borderRadius: "0.75rem",
+                            padding: "0.625rem 1.25rem",
+                            fontSize: "0.9375rem",
+                            fontWeight: 600,
+                            boxShadow: "none",
+                            transition:
+                                "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                            "&:hover": {
+                                boxShadow:
+                                    "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+                                transform: "translateY(-1px)",
+                            },
+                            "&:active": {
+                                transform: "translateY(0)",
+                            },
+                        },
+                        contained: {
+                            "&:hover": {
+                                boxShadow:
+                                    "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1)",
+                            },
+                        },
+                    },
+                },
+                MuiTextField: {
+                    styleOverrides: {
+                        root: {
+                            "& .MuiOutlinedInput-root": {
+                                borderRadius: "0.75rem",
+                                transition:
+                                    "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                                "&:hover": {
+                                    boxShadow:
+                                        "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+                                },
+                                "&.Mui-focused": {
+                                    boxShadow:
+                                        "0 0 0 3px rgba(37, 99, 235, 0.1)",
+                                },
+                            },
+                        },
+                    },
+                },
+                MuiCard: {
+                    styleOverrides: {
+                        root: {
+                            borderRadius: "1rem",
+                            boxShadow:
+                                "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)",
+                            transition:
+                                "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                            "&:hover": {
+                                boxShadow:
+                                    "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)",
+                            },
+                        },
+                    },
+                },
+                MuiPaper: {
+                    styleOverrides: {
+                        root: {
+                            borderRadius: "1rem",
+                        },
+                    },
+                },
+            },
+            breakpoints: {
+                values: {
+                    xs: 0,
+                    sm: 600,
+                    md: 992,
+                    lg: 1200,
+                    xl: 1536,
+                },
+            },
+        });
 
-        <div class="nav-link">View Certificate History</div>
+        // --- Data Helpers for Infinite Unique Name Generation ---
+        const firstNames = [
+            "James",
+            "Mary",
+            "Robert",
+            "Patricia",
+            "John",
+            "Jennifer",
+            "Michael",
+            "Linda",
+            "William",
+            "Elizabeth",
+            "David",
+            "Barbara",
+            "Richard",
+            "Susan",
+            "Joseph",
+            "Jessica",
+            "Thomas",
+            "Sarah",
+            "Charles",
+            "Karen",
+            "Christopher",
+            "Nancy",
+            "Daniel",
+            "Lisa",
+            "Matthew",
+            "Betty",
+            "Anthony",
+            "Margaret",
+            "Mark",
+            "Sandra",
+            "Donald",
+            "Ashley",
+            "Steven",
+            "Kimberly",
+            "Paul",
+            "Emily",
+            "Andrew",
+            "Donna",
+            "Joshua",
+            "Michelle",
+            "Kenneth",
+            "Dorothy",
+            "Kevin",
+            "Carol",
+            "Brian",
+            "Amanda",
+            "George",
+            "Melissa",
+            "Edward",
+            "Deborah",
+            "Ronald",
+            "Stephanie",
+            "Timothy",
+            "Rebecca",
+            "Jason",
+            "Sharon",
+            "Jeffrey",
+            "Laura",
+            "Ryan",
+            "Cynthia",
+            "Jacob",
+            "Kathleen",
+            "Gary",
+            "Amy",
+            "Nicholas",
+            "Shirley",
+            "Eric",
+            "Angela",
+            "Jonathan",
+            "Helen",
+            "Stephen",
+            "Anna",
+            "Larry",
+            "Brenda",
+            "Justin",
+            "Pamela",
+            "Scott",
+            "Nicole",
+            "Brandon",
+            "Emma",
+            "Benjamin",
+            "Samantha",
+            "Samuel",
+            "Katherine",
+            "Raymond",
+            "Christine",
+            "Gregory",
+            "Debra",
+            "Frank",
+            "Rachel",
+            "Alexander",
+            "Catherine",
+            "Patrick",
+            "Carolyn",
+            "Jack",
+            "Janet",
+            "Dennis",
+            "Ruth",
+            "Jerry",
+            "Maria",
+            "Tyler",
+            "Heather",
+            "Aaron",
+            "Diane",
+            "Jose",
+            "Virginia",
+            "Adam",
+            "Julie",
+            "Henry",
+            "Joyce",
+            "Nathan",
+            "Victoria",
+            "Douglas",
+            "Olivia",
+            "Zachary",
+            "Kelly",
+            "Peter",
+            "Christina",
+            "Kyle",
+            "Lauren",
+            "Walter",
+            "Joan",
+            "Ethan",
+            "Evelyn",
+            "Jeremy",
+            "Judith",
+            "Harold",
+            "Megan",
+            "Keith",
+            "Cheryl",
+            "Christian",
+            "Andrea",
+            "Roger",
+            "Hannah",
+            "Noah",
+            "Jacqueline",
+            "Gerald",
+            "Martha",
+            "Carl",
+            "Gloria",
+            "Terry",
+            "Teresa",
+            "Sean",
+            "Ann",
+            "Austin",
+            "Sara",
+            "Arthur",
+            "Madison",
+            "Lawrence",
+            "Frances",
+            "Jesse",
+            "Kathryn",
+            "Dylan",
+            "Janice",
+            "Bryan",
+            "Jean",
+            "Joe",
+            "Abigail",
+            "Jordan",
+            "Alice",
+            "Billy",
+            "Judy",
+            "Bruce",
+            "Sophia",
+            "Albert",
+            "Grace",
+            "Willie",
+            "Denise",
+            "Gabriel",
+            "Amber",
+            "Logan",
+            "Doris",
+            "Alan",
+            "Marilyn",
+            "Juan",
+            "Danielle",
+            "Ralph",
+            "Beverly",
+            "Roy",
+            "Isabella",
+            "Eugene",
+            "Theresa",
+            "Randy",
+            "Diana",
+            "Vincent",
+            "Natalie",
+            "Russell",
+            "Brittany",
+            "Louis",
+            "Charlotte",
+            "Philip",
+            "Marie",
+            "Bobby",
+            "Kayla",
+            "Johnny",
+            "Alexis",
+            "Bradley",
+            "Lori",
+        ];
 
-        <div class="certificate-border">
-            <h1 class="cert-title">Texas Educator Certificate</h1>
-            <p class="cert-subtitle">This certifies that</p>
-            <p class="cert-name" id="teacher-name">Chris A Allen</p>
-            <p class="cert-statement">
-                has fulfilled requirements of state law and regulations of the<br>
-                State Board for Educator Certification<br>
-                and is hereby authorized to perform duties as designated below:
-            </p>
+        const middleInitials = [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+            "M",
+            "N",
+            "O",
+            "P",
+            "Q",
+            "R",
+            "S",
+            "T",
+            "U",
+            "V",
+            "W",
+            "X",
+            "Y",
+            "Z",
+        ];
 
-            <div class="standard-banner">STANDARD</div>
-            
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 45%;">Description</th>
-                        <th style="width: 20%; text-align: center;">Effective Date</th>
-                        <th style="width: 20%; text-align: center;">Expiration Date</th>
-                        <th style="width: 15%; text-align: center;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr class="row-bold"><td>Classroom Teacher</td><td></td><td></td><td></td></tr>
-                    <tr>
-                        <td class="indent">Special Education<br>Grades (EC-12)</td>
-                        <td style="text-align: center;">08/01/2024</td>
-                        <td style="text-align: center;">07/31/2030</td>
-                        <td style="text-align: center;"><span class="status-valid">Valid</span></td>
-                    </tr>
-                    <tr>
-                        <td class="indent">Generalist<br>Grades (4-8)</td>
-                        <td style="text-align: center;">08/01/2024</td>
-                        <td style="text-align: center;">07/31/2030</td>
-                        <td style="text-align: center;"><span class="status-valid">Valid</span></td>
-                    </tr>
-                    <tr>
-                        <td class="indent">English as a Second Language Supplemental<br>Grades (EC-12)</td>
-                        <td style="text-align: center;">08/01/2024</td>
-                        <td style="text-align: center;">07/31/2030</td>
-                        <td style="text-align: center;"><span class="status-valid">Valid</span></td>
-                    </tr>
-                </tbody>
-            </table>
+        const lastNames = [
+            "Smith",
+            "Johnson",
+            "Williams",
+            "Brown",
+            "Jones",
+            "Garcia",
+            "Miller",
+            "Davis",
+            "Rodriguez",
+            "Martinez",
+            "Hernandez",
+            "Lopez",
+            "Gonzalez",
+            "Wilson",
+            "Anderson",
+            "Thomas",
+            "Taylor",
+            "Moore",
+            "Jackson",
+            "Martin",
+            "Lee",
+            "Perez",
+            "Thompson",
+            "White",
+            "Harris",
+            "Sanchez",
+            "Clark",
+            "Ramirez",
+            "Lewis",
+            "Robinson",
+            "Walker",
+            "Young",
+            "Allen",
+            "King",
+            "Wright",
+            "Scott",
+            "Torres",
+            "Nguyen",
+            "Hill",
+            "Flores",
+            "Green",
+            "Adams",
+            "Nelson",
+            "Baker",
+            "Hall",
+            "Rivera",
+            "Campbell",
+            "Mitchell",
+            "Carter",
+            "Roberts",
+            "Gomez",
+            "Phillips",
+            "Evans",
+            "Turner",
+            "Diaz",
+            "Parker",
+            "Cruz",
+            "Edwards",
+            "Collins",
+            "Reyes",
+            "Stewart",
+            "Morris",
+            "Morales",
+            "Murphy",
+            "Cook",
+            "Rogers",
+            "Gutierrez",
+            "Ortiz",
+            "Morgan",
+            "Cooper",
+            "Peterson",
+            "Bailey",
+            "Reed",
+            "Kelly",
+            "Howard",
+            "Ramos",
+            "Kim",
+            "Cox",
+            "Ward",
+            "Richardson",
+            "Watson",
+            "Brooks",
+            "Chavez",
+            "Wood",
+            "James",
+            "Bennett",
+            "Gray",
+            "Mendoza",
+            "Ruiz",
+            "Hughes",
+            "Price",
+            "Alvarez",
+            "Castillo",
+            "Sanders",
+            "Patel",
+            "Myers",
+            "Long",
+            "Ross",
+            "Foster",
+            "Jimenez",
+            "Powell",
+            "Jenkins",
+            "Perry",
+            "Russell",
+            "Sullivan",
+            "Bell",
+            "Coleman",
+            "Butler",
+            "Henderson",
+            "Barnes",
+            "Gonzales",
+            "Fisher",
+            "Vasquez",
+            "Simmons",
+            "Romero",
+            "Jordan",
+            "Patterson",
+            "Alexander",
+            "Hamilton",
+            "Graham",
+            "Reynolds",
+            "Griffin",
+            "Wallace",
+            "Moreno",
+            "West",
+            "Cole",
+            "Hayes",
+            "Bryant",
+            "Herrera",
+            "Gibson",
+            "Ellis",
+            "Tran",
+            "Medina",
+            "Aguilar",
+            "Stevens",
+            "Murray",
+            "Ford",
+            "Castro",
+            "Marshall",
+            "Owens",
+            "Harrison",
+            "Fernandez",
+            "McDonald",
+            "Woods",
+            "Washington",
+            "Kennedy",
+            "Wells",
+            "Vargas",
+            "Henry",
+            "Chen",
+            "Freeman",
+            "Webb",
+            "Tucker",
+            "Guzman",
+            "Burns",
+            "Crawford",
+            "Olson",
+            "Simpson",
+            "Porter",
+            "Hunter",
+            "Gordon",
+            "Mendez",
+            "Silva",
+            "Shaw",
+            "Snyder",
+            "Mason",
+            "Dixon",
+            "Munoz",
+        ];
 
-            <div class="footer-info">
-                Official Record of Certification<br>
-                <span id="current-date">Friday, January 02, 2026</span>
-            </div>
-        </div>
-    </div>
+        // Additional name components for infinite variations
+        const namePrefixes = [
+            "Dr.",
+            "Prof.",
+            "Rev.",
+            "Hon.",
+            "Sir",
+            "Lady",
+        ];
+        const nameSuffixes = [
+            "Jr.",
+            "Sr.",
+            "II",
+            "III",
+            "IV",
+            "V",
+            "PhD",
+            "MD",
+            "Esq.",
+        ];
+        const doubleFirstNames = [
+            "Mary Anne",
+            "Mary Jane",
+            "Anna Marie",
+            "Sarah Jane",
+            "Emma Rose",
+            "Lily Mae",
+            "Betty Lou",
+            "Billy Joe",
+            "John Paul",
+            "James Michael",
+            "Robert Lee",
+            "William James",
+            "David Alexander",
+            "Michael Joseph",
+        ];
+        const lastNamePrefixes = [
+            "Mc",
+            "Mac",
+            "O'",
+            "De",
+            "Van",
+            "Von",
+            "Del",
+            "La",
+            "Le",
+        ];
 
-    <script>
-        // Lists for Random Name Generation
-        const firstNames = ["James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda", "William", "Elizabeth", "David", "Barbara", "Richard", "Susan", "Joseph", "Jessica", "Thomas", "Sarah", "Charles", "Karen"];
-        const middleInitials = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "R", "S", "T", "W"];
-        const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzales", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin"];
+        // Track generated names to ensure uniqueness
+        const generatedNames = new Set();
+        let nameCounter = 0;
 
-        function generateNewRecord() {
-            // Generate Name
-            const fn = firstNames[Math.floor(Math.random() * firstNames.length)];
-            const mi = middleInitials[Math.floor(Math.random() * middleInitials.length)];
-            const ln = lastNames[Math.floor(Math.random() * lastNames.length)];
-            document.getElementById('teacher-name').innerText = `${fn} ${mi} ${ln}`;
+        // Advanced name generation patterns
+        const generateNamePattern = () => {
+            const patterns = [
+                "standard", // First M Last
+                "double_first", // Double-First M Last
+                "no_middle", // First Last
+                "double_middle", // First M1 M2 Last
+                "full_middle", // First MiddleName Last
+                "hyphenated_last", // First M Last-Last
+                "prefix", // Prefix First M Last
+                "suffix", // First M Last Suffix
+                "prefix_suffix", // Prefix First M Last Suffix
+                "compound_last", // First M Prefix+Last
+                "initial_first", // F. Middle Last
+                "numbered", // First M Last (with counter)
+            ];
+            return patterns[Math.floor(Math.random() * patterns.length)];
+        };
 
-            // Update Date to Current
-            const now = new Date();
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: '2-digit' };
-            const formattedDate = now.toLocaleDateString('en-US', options);
-            document.getElementById('current-date').innerText = formattedDate;
+        const certDescriptions = [
+            "Classroom Teacher\nGrades (EC-12)",
+            "Special Education\nGrades (EC-12)",
+            "Generalist\nGrades (4-8)",
+            "English as a Second Language Supplemental\nGrades (EC-12)",
+            "Principal\nGrades (EC-12)",
+            "School Counselor\nGrades (EC-12)",
+            "Superintendent\nGrades (EC-12)",
+            "Physical Education\nGrades (EC-12)",
+            "Music\nGrades (EC-12)",
+            "Art\nGrades (EC-12)",
+            "Mathematics\nGrades (7-12)",
+            "Science\nGrades (7-12)",
+            "Social Studies\nGrades (7-12)",
+        ];
+
+        const generateName = () => {
+            let name = "";
+            let attempts = 0;
+            const maxAttempts = 100;
+
+            // Generate unique names with various patterns
+            while (attempts < maxAttempts) {
+                const pattern = generateNamePattern();
+                let firstName, middleInit, lastName, generatedName;
+
+                switch (pattern) {
+                    case "standard":
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${firstName} ${middleInit} ${lastName}`;
+                        break;
+
+                    case "double_first":
+                        firstName =
+                            doubleFirstNames[
+                            Math.floor(
+                                Math.random() * doubleFirstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${firstName} ${middleInit} ${lastName}`;
+                        break;
+
+                    case "no_middle":
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${firstName} ${lastName}`;
+                        break;
+
+                    case "double_middle":
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        const mi1 =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        const mi2 =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${firstName} ${mi1}${mi2} ${lastName}`;
+                        break;
+
+                    case "full_middle":
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        const middleName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${firstName} ${middleName} ${lastName}`;
+                        break;
+
+                    case "hyphenated_last":
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        const ln1 =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        const ln2 =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${firstName} ${middleInit} ${ln1}-${ln2}`;
+                        break;
+
+                    case "prefix":
+                        const prefix =
+                            namePrefixes[
+                            Math.floor(
+                                Math.random() * namePrefixes.length,
+                            )
+                            ];
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${prefix} ${firstName} ${middleInit} ${lastName}`;
+                        break;
+
+                    case "suffix":
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        const suffix =
+                            nameSuffixes[
+                            Math.floor(
+                                Math.random() * nameSuffixes.length,
+                            )
+                            ];
+                        generatedName = `${firstName} ${middleInit} ${lastName} ${suffix}`;
+                        break;
+
+                    case "prefix_suffix":
+                        const pref =
+                            namePrefixes[
+                            Math.floor(
+                                Math.random() * namePrefixes.length,
+                            )
+                            ];
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        const suff =
+                            nameSuffixes[
+                            Math.floor(
+                                Math.random() * nameSuffixes.length,
+                            )
+                            ];
+                        generatedName = `${pref} ${firstName} ${middleInit} ${lastName} ${suff}`;
+                        break;
+
+                    case "compound_last":
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        const lnPrefix =
+                            lastNamePrefixes[
+                            Math.floor(
+                                Math.random() * lastNamePrefixes.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${firstName} ${middleInit} ${lnPrefix}${lastName}`;
+                        break;
+
+                    case "initial_first":
+                        const fnInitial =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ][0];
+                        const middleNameFull =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${fnInitial}. ${middleNameFull} ${lastName}`;
+                        break;
+
+                    case "numbered":
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        nameCounter++;
+                        // Only add number if name exists in set
+                        const baseName = `${firstName} ${middleInit} ${lastName}`;
+                        if (
+                            generatedNames.has(baseName) &&
+                            nameCounter > 1
+                        ) {
+                            generatedName = `${baseName} ${nameCounter}`;
+                        } else {
+                            generatedName = baseName;
+                        }
+                        break;
+
+                    default:
+                        firstName =
+                            firstNames[
+                            Math.floor(
+                                Math.random() * firstNames.length,
+                            )
+                            ];
+                        middleInit =
+                            middleInitials[
+                            Math.floor(
+                                Math.random() * middleInitials.length,
+                            )
+                            ];
+                        lastName =
+                            lastNames[
+                            Math.floor(Math.random() * lastNames.length)
+                            ];
+                        generatedName = `${firstName} ${middleInit} ${lastName}`;
+                }
+
+                // Check if name is unique
+                if (!generatedNames.has(generatedName)) {
+                    generatedNames.add(generatedName);
+                    return generatedName;
+                }
+
+                attempts++;
+            }
+
+            // Fallback: if somehow we can't generate unique name, add timestamp
+            const fallbackFirst =
+                firstNames[Math.floor(Math.random() * firstNames.length)];
+            const fallbackMi =
+                middleInitials[
+                Math.floor(Math.random() * middleInitials.length)
+                ];
+            const fallbackLast =
+                lastNames[Math.floor(Math.random() * lastNames.length)];
+            const timestamp = Date.now() % 10000;
+            const fallbackName = `${fallbackFirst} ${fallbackMi} ${fallbackLast} ${timestamp}`;
+            generatedNames.add(fallbackName);
+            return fallbackName;
+        };
+
+        const formatDate = (date) => {
+            if (!date) return "";
+            const options = {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "2-digit",
+            };
+            return date.toLocaleDateString("en-US", options);
+        };
+
+        const defaultRows = [
+            {
+                id: 1,
+                desc: "Classroom Teacher",
+                type: "header",
+                effective: "",
+                expires: "",
+                status: "",
+            },
+            {
+                id: 2,
+                desc: "Special Education\nGrades (EC-12)",
+                type: "data",
+                effective: "08/01/2024",
+                expires: "07/31/2030",
+                status: "Valid",
+            },
+            {
+                id: 3,
+                desc: "Generalist\nGrades (4-8)",
+                type: "data",
+                effective: "08/01/2024",
+                expires: "07/31/2030",
+                status: "Valid",
+            },
+            {
+                id: 4,
+                desc: "English as a Second Language Supplemental\nGrades (EC-12)",
+                type: "data",
+                effective: "08/01/2024",
+                expires: "07/31/2030",
+                status: "Valid",
+            },
+        ];
+
+        // Custom Component for Cycling Description
+        const SmartDescriptionField = ({
+            label,
+            value,
+            onChange,
+            isHeader,
+        }) => {
+            const [isAutoCycling, setIsAutoCycling] = React.useState(false);
+            const [animating, setAnimating] = React.useState(false);
+            const intervalRef = React.useRef(null);
+
+            const cycleDescription = React.useCallback(() => {
+                setAnimating(true);
+                setTimeout(() => {
+                    const randomDesc =
+                        certDescriptions[
+                        Math.floor(
+                            Math.random() * certDescriptions.length,
+                        )
+                        ];
+                    onChange(randomDesc);
+                    setAnimating(false);
+                }, 200); // Wait for fade out
+            }, [onChange]);
+
+            React.useEffect(() => {
+                if (isAutoCycling) {
+                    intervalRef.current = setInterval(
+                        cycleDescription,
+                        3000,
+                    );
+                } else {
+                    if (intervalRef.current)
+                        clearInterval(intervalRef.current);
+                }
+                return () => clearInterval(intervalRef.current);
+            }, [isAutoCycling, cycleDescription]);
+
+            return (
+                <Box sx={{ position: "relative" }}>
+                    <TextField
+                        fullWidth
+                        size="small"
+                        label={label}
+                        multiline
+                        rows={isHeader ? 1 : 2}
+                        value={value}
+                        onChange={(e) => onChange(e.target.value)}
+                        sx={{
+                            mb: 1.5,
+                            bgcolor: isHeader ? "#f5f5f5" : "transparent",
+                            "& .MuiInputBase-root": {
+                                transition: "opacity 0.2s ease-in-out",
+                                opacity: animating ? 0.5 : 1,
+                            },
+                        }}
+                    />
+                    {!isHeader && (
+                        <Box
+                            sx={{
+                                position: "absolute",
+                                right: 8,
+                                top: 8,
+                                display: "flex",
+                                gap: 0.5,
+                            }}
+                        >
+                            <MaterialUI.Tooltip title="Shuffle Description">
+                                <IconButton
+                                    size="small"
+                                    onClick={cycleDescription}
+                                    aria-label="shuffle description"
+                                >
+                                    <span
+                                        className="material-icons"
+                                        style={{ fontSize: 16 }}
+                                    >
+                                        shuffle
+                                    </span>
+                                </IconButton>
+                            </MaterialUI.Tooltip>
+                            <MaterialUI.Tooltip
+                                title={
+                                    isAutoCycling
+                                        ? "Stop Auto-Cycle"
+                                        : "Start Auto-Cycle"
+                                }
+                            >
+                                <IconButton
+                                    size="small"
+                                    onClick={() =>
+                                        setIsAutoCycling(!isAutoCycling)
+                                    }
+                                    color={
+                                        isAutoCycling
+                                            ? "primary"
+                                            : "default"
+                                    }
+                                    aria-label="toggle auto-cycle"
+                                >
+                                    <span
+                                        className="material-icons"
+                                        style={{ fontSize: 16 }}
+                                    >
+                                        autorenew
+                                    </span>
+                                </IconButton>
+                            </MaterialUI.Tooltip>
+                        </Box>
+                    )}
+                </Box>
+            );
+        };
+
+        function App() {
+            const [name, setName] = React.useState("Chris A Allen");
+            const [date, setDate] = React.useState(
+                new Date().toISOString().split("T")[0],
+            ); // YYYY-MM-DD
+            const [displayDate, setDisplayDate] = React.useState(
+                formatDate(new Date()),
+            );
+            const [rows, setRows] = React.useState(defaultRows);
+
+            // Tab state for better mobile organization if needed, but keeping single view for now
+            const [activeSection, setActiveSection] =
+                React.useState("main");
+
+            // Responsive scale calculation for preview
+            const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+            const isTablet = useMediaQuery(
+                theme.breakpoints.between("sm", "md"),
+            );
+
+            // Calculate scale to fit 900px into viewport if needed
+            const [scale, setScale] = React.useState(1);
+
+            React.useEffect(() => {
+                const handleResize = () => {
+                    const rightPanelWidth =
+                        window.innerWidth >= 992
+                            ? window.innerWidth * 0.6
+                            : window.innerWidth;
+                    const padding = 40; // 20px each side
+                    const availableWidth = rightPanelWidth - padding;
+
+                    if (availableWidth < 900) {
+                        setScale(availableWidth / 900);
+                    } else {
+                        setScale(1);
+                    }
+                };
+
+                window.addEventListener("resize", handleResize);
+                handleResize(); // Initial call
+                return () =>
+                    window.removeEventListener("resize", handleResize);
+            }, []);
+
+            // Update display date when date picker changes
+            React.useEffect(() => {
+                if (date) {
+                    const d = new Date(date);
+                    const userTimezoneOffset =
+                        d.getTimezoneOffset() * 60000;
+                    const adjustedDate = new Date(
+                        d.getTime() + userTimezoneOffset,
+                    );
+                    setDisplayDate(formatDate(adjustedDate));
+                }
+            }, [date]);
+
+            const handleRandomize = () => {
+                setName(generateName());
+                // Randomize effective dates slightly for realism
+                const randomYear = 2020 + Math.floor(Math.random() * 5);
+                const randomRows = rows.map((r) => {
+                    if (r.type === "data") {
+                        return {
+                            ...r,
+                            effective: `08/01/${randomYear}`,
+                            expires: `07/31/${randomYear + 6}`,
+                        };
+                    }
+                    return r;
+                });
+                setRows(randomRows);
+            };
+
+            const handleRowChange = (id, field, value) => {
+                setRows(
+                    rows.map((r) =>
+                        r.id === id ? { ...r, [field]: value } : r,
+                    ),
+                );
+            };
+
+            const handleDownloadPNG = async () => {
+                const element = document.getElementById("capture-area");
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    useCORS: true,
+                });
+                const link = document.createElement("a");
+                link.download = `Certificate_${name.replace(/\s+/g, "_")}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            };
+
+            const handleDownloadPDF = async () => {
+                const { jsPDF } = window.jspdf;
+                const element = document.getElementById("capture-area");
+                const canvas = await html2canvas(element, { scale: 2 });
+                const imgData = canvas.toDataURL("image/png");
+                const pdf = new jsPDF("l", "px", [
+                    canvas.width,
+                    canvas.height,
+                ]);
+                pdf.addImage(
+                    imgData,
+                    "PNG",
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height,
+                );
+                pdf.save(`Certificate_${name.replace(/\s+/g, "_")}.pdf`);
+            };
+
+            return (
+                <ThemeProvider theme={theme}>
+                    <CssBaseline />
+                    <Box
+                        sx={{
+                            flexGrow: 1,
+                            height: "100vh",
+                            display: "flex",
+                            flexDirection: "column",
+                            overflow: "hidden",
+                        }}
+                    >
+                        <Grid
+                            container
+                            sx={{
+                                flexGrow: 1,
+                                height: "100%",
+                                overflow: "hidden",
+                            }}
+                        >
+                            {/* Left Panel: Inputs (40% desktop) */}
+                            <Grid
+                                item
+                                xs={12}
+                                md={4.8}
+                                sx={{
+                                    height: { xs: "auto", md: "100%" },
+                                    overflowY: "auto",
+                                    background:
+                                        "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+                                    borderRight: {
+                                        md: "1px solid #e5e7eb",
+                                    },
+                                    p: { xs: 3, md: 4 },
+                                    boxShadow: {
+                                        md: "4px 0 24px rgba(0, 0, 0, 0.04)",
+                                    },
+                                    position: "relative",
+                                }}
+                            >
+                                {/* Header Section */}
+                                <Box
+                                    sx={{
+                                        mb: 4,
+                                        pb: 3,
+                                        borderBottom: "2px solid #e5e7eb",
+                                        animation: "slideIn 0.4s ease-out",
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "space-between",
+                                            mb: 1,
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 1.5,
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    width: 48,
+                                                    height: 48,
+                                                    borderRadius: "12px",
+                                                    background:
+                                                        "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent:
+                                                        "center",
+                                                    boxShadow:
+                                                        "0 4px 12px rgba(37, 99, 235, 0.3)",
+                                                }}
+                                            >
+                                                <span
+                                                    className="material-icons"
+                                                    style={{
+                                                        color: "white",
+                                                        fontSize: 28,
+                                                    }}
+                                                >
+                                                    workspace_premium
+                                                </span>
+                                            </Box>
+                                            <Box>
+                                                <Typography
+                                                    variant="h5"
+                                                    sx={{
+                                                        fontWeight: 800,
+                                                        background:
+                                                            "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                                                        WebkitBackgroundClip:
+                                                            "text",
+                                                        WebkitTextFillColor:
+                                                            "transparent",
+                                                        letterSpacing:
+                                                            "-0.02em",
+                                                        mb: 0.5,
+                                                    }}
+                                                >
+                                                    Certificate Editor
+                                                </Typography>
+                                                <Typography
+                                                    variant="caption"
+                                                    sx={{
+                                                        color: "text.secondary",
+                                                        fontWeight: 500,
+                                                    }}
+                                                >
+                                                    Professional Document
+                                                    Generator
+                                                </Typography>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                    <MaterialUI.Tooltip
+                                        title="Generate random data for all fields"
+                                        placement="bottom"
+                                    >
+                                        <Button
+                                            variant="outlined"
+                                            color="success"
+                                            fullWidth
+                                            size="large"
+                                            onClick={handleRandomize}
+                                            startIcon={
+                                                <span className="material-icons">
+                                                    casino
+                                                </span>
+                                            }
+                                            sx={{
+                                                mt: 2,
+                                                py: 1.5,
+                                                borderWidth: 2,
+                                                fontWeight: 600,
+                                                "&:hover": {
+                                                    borderWidth: 2,
+                                                    background:
+                                                        "rgba(34, 197, 94, 0.04)",
+                                                },
+                                            }}
+                                        >
+                                            Randomize All Data
+                                        </Button>
+                                    </MaterialUI.Tooltip>
+                                </Box>
+
+                                <Stack spacing={3} sx={{ pb: 5 }}>
+                                    {/* Candidate Details Card */}
+                                    <Card
+                                        variant="outlined"
+                                        sx={{
+                                            borderRadius: "16px",
+                                            border: "1px solid #e5e7eb",
+                                            overflow: "visible",
+                                            transition:
+                                                "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                                            "&:hover": {
+                                                boxShadow:
+                                                    "0 8px 24px rgba(0, 0, 0, 0.08)",
+                                                transform:
+                                                    "translateY(-2px)",
+                                            },
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                px: 3,
+                                                py: 2,
+                                                background:
+                                                    "linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)",
+                                                borderBottom:
+                                                    "1px solid #bfdbfe",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 1.5,
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    width: 36,
+                                                    height: 36,
+                                                    borderRadius: "10px",
+                                                    background:
+                                                        "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent:
+                                                        "center",
+                                                    boxShadow:
+                                                        "0 4px 12px rgba(37, 99, 235, 0.25)",
+                                                }}
+                                            >
+                                                <span
+                                                    className="material-icons"
+                                                    style={{
+                                                        color: "white",
+                                                        fontSize: 20,
+                                                    }}
+                                                >
+                                                    person
+                                                </span>
+                                            </Box>
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    color: "#1e40af",
+                                                    letterSpacing: "0.05em",
+                                                    fontSize: "0.8125rem",
+                                                }}
+                                            >
+                                                CANDIDATE DETAILS
+                                            </Typography>
+                                        </Box>
+                                        <CardContent sx={{ p: 3 }}>
+                                            <Stack spacing={2.5}>
+                                                <TextField
+                                                    fullWidth
+                                                    label="Educator Name"
+                                                    variant="outlined"
+                                                    value={name}
+                                                    onChange={(e) =>
+                                                        setName(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                    InputProps={{
+                                                        endAdornment: (
+                                                            <MaterialUI.InputAdornment position="end">
+                                                                <MaterialUI.Tooltip title="Generate random name">
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        onClick={() =>
+                                                                            setName(
+                                                                                generateName(),
+                                                                            )
+                                                                        }
+                                                                        sx={{
+                                                                            "&:hover":
+                                                                            {
+                                                                                background:
+                                                                                    "rgba(37, 99, 235, 0.08)",
+                                                                                color: "primary.main",
+                                                                            },
+                                                                        }}
+                                                                    >
+                                                                        <span
+                                                                            className="material-icons"
+                                                                            style={{
+                                                                                fontSize: 20,
+                                                                            }}
+                                                                        >
+                                                                            refresh
+                                                                        </span>
+                                                                    </IconButton>
+                                                                </MaterialUI.Tooltip>
+                                                            </MaterialUI.InputAdornment>
+                                                        ),
+                                                    }}
+                                                />
+                                                <TextField
+                                                    fullWidth
+                                                    label="Current Date"
+                                                    type="date"
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    value={date}
+                                                    onChange={(e) =>
+                                                        setDate(
+                                                            e.target.value,
+                                                        )
+                                                    }
+                                                />
+                                            </Stack>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Certifications Card */}
+                                    <Card
+                                        variant="outlined"
+                                        sx={{
+                                            borderRadius: "16px",
+                                            border: "1px solid #e5e7eb",
+                                            transition:
+                                                "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                                            "&:hover": {
+                                                boxShadow:
+                                                    "0 8px 24px rgba(0, 0, 0, 0.08)",
+                                                transform:
+                                                    "translateY(-2px)",
+                                            },
+                                        }}
+                                    >
+                                        <Box
+                                            sx={{
+                                                px: 3,
+                                                py: 2,
+                                                background:
+                                                    "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)",
+                                                borderBottom:
+                                                    "1px solid #bbf7d0",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 1.5,
+                                            }}
+                                        >
+                                            <Box
+                                                sx={{
+                                                    width: 36,
+                                                    height: 36,
+                                                    borderRadius: "10px",
+                                                    background:
+                                                        "linear-gradient(135deg, #22c55e 0%, #16a34a 100%)",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent:
+                                                        "center",
+                                                    boxShadow:
+                                                        "0 4px 12px rgba(34, 197, 94, 0.25)",
+                                                }}
+                                            >
+                                                <span
+                                                    className="material-icons"
+                                                    style={{
+                                                        color: "white",
+                                                        fontSize: 20,
+                                                    }}
+                                                >
+                                                    verified
+                                                </span>
+                                            </Box>
+                                            <Typography
+                                                variant="subtitle2"
+                                                sx={{
+                                                    fontWeight: 700,
+                                                    color: "#15803d",
+                                                    letterSpacing: "0.05em",
+                                                    fontSize: "0.8125rem",
+                                                }}
+                                            >
+                                                CERTIFICATIONS
+                                            </Typography>
+                                        </Box>
+                                        <CardContent sx={{ p: 0 }}>
+                                            {rows.map((row, index) => (
+                                                <Box
+                                                    key={row.id}
+                                                    sx={{
+                                                        p: 3,
+                                                        borderBottom:
+                                                            index <
+                                                                rows.length - 1
+                                                                ? "1px solid #f3f4f6"
+                                                                : "none",
+                                                        bgcolor: "white",
+                                                        transition:
+                                                            "background-color 0.2s",
+                                                        "&:hover": {
+                                                            bgcolor:
+                                                                "#f9fafb",
+                                                        },
+                                                    }}
+                                                >
+                                                    <SmartDescriptionField
+                                                        label={
+                                                            row.type ===
+                                                                "header"
+                                                                ? "Header Text"
+                                                                : "Certificate Description"
+                                                        }
+                                                        value={row.desc}
+                                                        isHeader={
+                                                            row.type ===
+                                                            "header"
+                                                        }
+                                                        onChange={(val) =>
+                                                            handleRowChange(
+                                                                row.id,
+                                                                "desc",
+                                                                val,
+                                                            )
+                                                        }
+                                                    />
+                                                    {row.type ===
+                                                        "data" && (
+                                                            <Grid
+                                                                container
+                                                                spacing={2}
+                                                            >
+                                                                <Grid
+                                                                    item
+                                                                    xs={4}
+                                                                >
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        size="small"
+                                                                        label="Effective"
+                                                                        value={
+                                                                            row.effective
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            handleRowChange(
+                                                                                row.id,
+                                                                                "effective",
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </Grid>
+                                                                <Grid
+                                                                    item
+                                                                    xs={4}
+                                                                >
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        size="small"
+                                                                        label="Expires"
+                                                                        value={
+                                                                            row.expires
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            handleRowChange(
+                                                                                row.id,
+                                                                                "expires",
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </Grid>
+                                                                <Grid
+                                                                    item
+                                                                    xs={4}
+                                                                >
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        size="small"
+                                                                        label="Status"
+                                                                        value={
+                                                                            row.status
+                                                                        }
+                                                                        onChange={(
+                                                                            e,
+                                                                        ) =>
+                                                                            handleRowChange(
+                                                                                row.id,
+                                                                                "status",
+                                                                                e
+                                                                                    .target
+                                                                                    .value,
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                </Grid>
+                                                            </Grid>
+                                                        )}
+                                                </Box>
+                                            ))}
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* Export Buttons */}
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            gap: 2,
+                                            mt: 2,
+                                            p: 3,
+                                            borderRadius: "16px",
+                                            background:
+                                                "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
+                                            border: "1px solid #fcd34d",
+                                        }}
+                                    >
+                                        <Button
+                                            variant="contained"
+                                            sx={{
+                                                flex: 1,
+                                                background:
+                                                    "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                                                py: 1.75,
+                                                fontSize: "0.9375rem",
+                                                fontWeight: 600,
+                                                boxShadow:
+                                                    "0 4px 12px rgba(37, 99, 235, 0.3)",
+                                                "&:hover": {
+                                                    background:
+                                                        "linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)",
+                                                    boxShadow:
+                                                        "0 8px 20px rgba(37, 99, 235, 0.4)",
+                                                },
+                                            }}
+                                            onClick={handleDownloadPNG}
+                                            startIcon={
+                                                <span className="material-icons">
+                                                    image
+                                                </span>
+                                            }
+                                        >
+                                            Export PNG
+                                        </Button>
+                                        <Button
+                                            variant="contained"
+                                            sx={{
+                                                flex: 1,
+                                                background:
+                                                    "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+                                                py: 1.75,
+                                                fontSize: "0.9375rem",
+                                                fontWeight: 600,
+                                                boxShadow:
+                                                    "0 4px 12px rgba(239, 68, 68, 0.3)",
+                                                "&:hover": {
+                                                    background:
+                                                        "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)",
+                                                    boxShadow:
+                                                        "0 8px 20px rgba(239, 68, 68, 0.4)",
+                                                },
+                                            }}
+                                            onClick={handleDownloadPDF}
+                                            startIcon={
+                                                <span className="material-icons">
+                                                    picture_as_pdf
+                                                </span>
+                                            }
+                                        >
+                                            Export PDF
+                                        </Button>
+                                    </Box>
+                                </Stack>
+                            </Grid>
+
+                            {/* Right Panel: Preview (60% desktop) */}
+                            <Grid
+                                item
+                                xs={12}
+                                md={7.2}
+                                sx={{
+                                    background:
+                                        "linear-gradient(180deg, #e0e7ff 0%, #f3f4f6 50%, #e0e7ff 100%)",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    justifyContent: "flex-start",
+                                    overflow: "auto",
+                                    height: { xs: "auto", md: "100%" },
+                                    p: 3,
+                                    position: "relative",
+                                }}
+                            >
+                                {/* Preview Badge */}
+                                <Box
+                                    sx={{
+                                        mb: 3,
+                                        px: 3,
+                                        py: 1.5,
+                                        borderRadius: "12px",
+                                        background:
+                                            "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+                                        boxShadow:
+                                            "0 4px 12px rgba(37, 99, 235, 0.3)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        gap: 1.5,
+                                    }}
+                                >
+                                    <span
+                                        className="material-icons"
+                                        style={{
+                                            color: "white",
+                                            fontSize: 20,
+                                        }}
+                                    >
+                                        visibility
+                                    </span>
+                                    <Typography
+                                        variant="subtitle2"
+                                        sx={{
+                                            color: "white",
+                                            fontWeight: 700,
+                                            letterSpacing: "0.1em",
+                                            fontSize: "0.8125rem",
+                                        }}
+                                    >
+                                        LIVE PREVIEW
+                                    </Typography>
+                                </Box>
+
+                                {/*
+                                    Scale wrapper: This div scales the content based on available width
+                                */}
+                                <div
+                                    className="preview-wrapper"
+                                    style={{
+                                        transform: `scale(${scale})`,
+                                        width: "900px", // Helper to reserve space before scaling
+                                        height: "auto",
+                                    }}
+                                >
+                                    <div
+                                        id="capture-area"
+                                        className="cert-fixed-width"
+                                    >
+                                        <div className="top-header">
+                                            <div className="header-left">
+                                                <span className="check-icon">
+                                                    ✓
+                                                </span>
+                                                <span>
+                                                    SBEC Official Record of
+                                                    Educator Certifica...
+                                                </span>
+                                            </div>
+                                            <div className="refresh-icon">
+                                                ↻
+                                            </div>
+                                        </div>
+
+                                        <div className="nav-link">
+                                            View Certificate History
+                                        </div>
+
+                                        <div className="certificate-border">
+                                            <h1 className="cert-title">
+                                                Texas Educator Certificate
+                                            </h1>
+                                            <p className="cert-subtitle">
+                                                This certifies that
+                                            </p>
+                                            <p className="cert-name">
+                                                {name}
+                                            </p>
+                                            <p className="cert-statement">
+                                                has fulfilled requirements
+                                                of state law and regulations
+                                                of the
+                                                <br />
+                                                State Board for Educator
+                                                Certification
+                                                <br />
+                                                and is hereby authorized to
+                                                perform duties as designated
+                                                below:
+                                            </p>
+
+                                            <div className="standard-banner">
+                                                STANDARD
+                                            </div>
+
+                                            <table className="cert-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th
+                                                            style={{
+                                                                width: "45%",
+                                                            }}
+                                                        >
+                                                            Description
+                                                        </th>
+                                                        <th
+                                                            style={{
+                                                                width: "20%",
+                                                                textAlign:
+                                                                    "center",
+                                                            }}
+                                                        >
+                                                            Effective Date
+                                                        </th>
+                                                        <th
+                                                            style={{
+                                                                width: "20%",
+                                                                textAlign:
+                                                                    "center",
+                                                            }}
+                                                        >
+                                                            Expiration Date
+                                                        </th>
+                                                        <th
+                                                            style={{
+                                                                width: "15%",
+                                                                textAlign:
+                                                                    "center",
+                                                            }}
+                                                        >
+                                                            Status
+                                                        </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {rows.map((row) => (
+                                                        <tr
+                                                            key={row.id}
+                                                            className={
+                                                                row.type ===
+                                                                    "header"
+                                                                    ? "row-bold"
+                                                                    : ""
+                                                            }
+                                                        >
+                                                            <td
+                                                                className={
+                                                                    row.type ===
+                                                                        "data"
+                                                                        ? "indent"
+                                                                        : ""
+                                                                }
+                                                            >
+                                                                {row.desc
+                                                                    .split(
+                                                                        "\n",
+                                                                    )
+                                                                    .map(
+                                                                        (
+                                                                            line,
+                                                                            i,
+                                                                        ) => (
+                                                                            <React.Fragment
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    line
+                                                                                }
+                                                                                {i <
+                                                                                    row.desc.split(
+                                                                                        "\n",
+                                                                                    )
+                                                                                        .length -
+                                                                                    1 && (
+                                                                                        <br />
+                                                                                    )}
+                                                                            </React.Fragment>
+                                                                        ),
+                                                                    )}
+                                                            </td>
+                                                            <td
+                                                                style={{
+                                                                    textAlign:
+                                                                        "center",
+                                                                }}
+                                                            >
+                                                                {
+                                                                    row.effective
+                                                                }
+                                                            </td>
+                                                            <td
+                                                                style={{
+                                                                    textAlign:
+                                                                        "center",
+                                                                }}
+                                                            >
+                                                                {
+                                                                    row.expires
+                                                                }
+                                                            </td>
+                                                            <td
+                                                                style={{
+                                                                    textAlign:
+                                                                        "center",
+                                                                }}
+                                                            >
+                                                                {row.status && (
+                                                                    <span className="status-valid">
+                                                                        {
+                                                                            row.status
+                                                                        }
+                                                                    </span>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+
+                                            <div className="footer-info">
+                                                Official Record of
+                                                Certification
+                                                <br />
+                                                <span>{displayDate}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Grid>
+                        </Grid>
+                    </Box>
+                </ThemeProvider>
+            );
         }
 
-        // Initialize with current date on load
-        window.onload = generateNewRecord;
-
-        // Export as PNG
-        async function downloadPNG() {
-            const element = document.getElementById('capture-area');
-            const canvas = await html2canvas(element, { scale: 2 }); // Scale 2 for high quality
-            const link = document.createElement('a');
-            link.download = `Certificate_${document.getElementById('teacher-name').innerText}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-        }
-
-        // Export as PDF
-        async function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const element = document.getElementById('capture-area');
-            
-            const canvas = await html2canvas(element, { scale: 2 });
-            const imgData = canvas.toDataURL('image/png');
-            
-            // Calculate dimensions to fit A4
-            const pdf = new jsPDF('l', 'px', [canvas.width, canvas.height]);
-            pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-            pdf.save(`Certificate_${document.getElementById('teacher-name').innerText}.pdf`);
-        }
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(<App />);
     </script>
 </body>
+
 </html>
